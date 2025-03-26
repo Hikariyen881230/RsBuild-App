@@ -7,11 +7,6 @@ import { useNavigate } from 'react-router';
 const CONFIG = {
   fps: 4,
   qrbox: { width: 300, height: 200 },
-  videoConstraints: {
-    // facingMode: { exact: 'environment' }, // 強制使用後鏡頭
-    width: { ideal: 1920 }, // 設定理想寬度
-    height: { ideal: 1080 }, // 設定理想高度
-  },
   formatsToSupport: [
     Html5QrcodeSupportedFormats.CODE_128,
     Html5QrcodeSupportedFormats.QR_CODE,
