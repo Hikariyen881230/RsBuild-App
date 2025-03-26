@@ -18,18 +18,18 @@ const CONFIG = {
 const QRCODE_REGION = 'ADVANCED_EXAMPLE_QRCODE_REGION';
 
 function QrcodeScanner() {
+  const navigate = useNavigate();
+  const [selectedCameraId, setSelectedCameraId] = useState<string | undefined>(
+    undefined,
+  );
   const {
     fetchCameras,
     state: { loading, error, cameraDevices },
   } = useFetchCameras();
-  const navigate = useNavigate();
+
   useEffect(() => {
     fetchCameras();
   }, []);
-
-  const [selectedCameraId, setSelectedCameraId] = useState<string | undefined>(
-    undefined,
-  );
 
   const onScanned = (text: string) => {
     navigate('/', { state: { decodedText: text } });

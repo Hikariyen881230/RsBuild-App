@@ -1,6 +1,5 @@
 import { Html5Qrcode } from 'html5-qrcode';
 import { useEffect, useRef, useState } from 'react';
-import { Html5QrcodeScanType } from 'html5-qrcode/esm/core';
 import {
   Html5QrcodeCameraScanConfig,
   Html5QrcodeConfigs,
@@ -8,12 +7,9 @@ import {
 
 export interface Html5QrcodeScannerConfig
   extends Html5QrcodeCameraScanConfig,
-    Html5QrcodeConfigs {
-  rememberLastUsedCamera?: boolean | undefined;
-  supportedScanTypes: Array<Html5QrcodeScanType> | [];
-}
+    Html5QrcodeConfigs {}
 
-enum PluginState {
+enum SCANNER_STATE {
   Initial = 'initial',
   Starting = 'starting',
   Started = 'started',
@@ -21,17 +17,12 @@ enum PluginState {
   StoppingFailed = 'stoppingFailed',
 }
 
-interface IHtmlQrcodeAdvancedPluginProps {
+interface IScannerProps {
   config: Html5QrcodeScannerConfig;
   cameraId: string;
   onCodeScanned: (code: string) => void;
   qrcodeRegionId: string;
   className?: string;
-}
-
-export interface IHtmlQrcodePluginForwardedRef {
-  pause: () => void;
-  resume: () => void;
 }
 
 export const Scanner = ({
@@ -40,40 +31,41 @@ export const Scanner = ({
   cameraId,
   onCodeScanned,
   className,
-}: IHtmlQrcodeAdvancedPluginProps) => {
+}: IScannerProps) => {
   const html5Qrcode = useRef<null | Html5Qrcode>(null);
+  const scannerStateRef = useRef<SCANNER_STATE>(SCANNER_STATE.Initial);
   const [error, setError] = useState<string | null>(null);
 
+  const stopScanner = async () => {
+    if (html5Qrcode.current?.isScanning) {
+      try {
+        await html5Qrcode.current.stop();
+        scannerStateRef.current = SCANNER_STATE.Initial;
+      } catch (err) {
+        setError('停止相機失敗');
+        throw new Error(err as string);
+      }
+    }
+  };
+
+  // 在組件卸載時和相機切換前調用
   useEffect(() => {
-    if (!html5Qrcode.current) {
+    if (!html5Qrcode.current && qrcodeRegionId) {
       html5Qrcode.current = new Html5Qrcode(qrcodeRegionId);
     }
-    const prevQrcodeRegionId = qrcodeRegionId;
     return () => {
-      if (html5Qrcode.current && prevQrcodeRegionId !== qrcodeRegionId) {
-        // stopping due changed qrcodeRegionId
-        html5Qrcode.current
-          ?.stop()
-          .then(() => {
-            // camera stopped
-          })
-          .catch(() => {
-            // camera failed to stop
-          });
-      }
+      stopScanner();
     };
-  }, [qrcodeRegionId]);
-
-  const pluginStateRef = useRef<PluginState>(PluginState.Initial);
+  }, []);
 
   useEffect(() => {
     const startScanner = async () => {
       if (
         html5Qrcode.current &&
-        pluginStateRef.current !== PluginState.Starting
+        scannerStateRef.current !== SCANNER_STATE.Starting
       ) {
         try {
-          pluginStateRef.current = PluginState.Starting;
+          scannerStateRef.current = SCANNER_STATE.Starting;
 
           // 先停止當前相機
           if (html5Qrcode.current.isScanning) {
@@ -82,42 +74,24 @@ export const Scanner = ({
 
           // 啟動新相機
           await html5Qrcode.current.start(
-            cameraId,
+            { facingMode: 'environment' },
             config,
             onCodeScanned,
             () => {},
           );
 
-          pluginStateRef.current = PluginState.Started;
+          scannerStateRef.current = SCANNER_STATE.Started;
           setError(null);
         } catch (err) {
-          console.error('Camera switch failed:', err);
           setError('相機切換失敗');
-          pluginStateRef.current = PluginState.StartingFailed;
+          scannerStateRef.current = SCANNER_STATE.StartingFailed;
+          throw new Error(err as string);
         }
       }
     };
 
     startScanner();
   }, [cameraId]);
-
-  const stopScanner = async () => {
-    if (html5Qrcode.current?.isScanning) {
-      try {
-        await html5Qrcode.current.stop();
-        pluginStateRef.current = PluginState.Initial;
-      } catch (err) {
-        console.error('停止相機失敗:', err);
-      }
-    }
-  };
-
-  // 在組件卸載時和相機切換前調用
-  useEffect(() => {
-    return () => {
-      stopScanner();
-    };
-  }, []);
 
   return (
     <div>
