@@ -11,10 +11,6 @@ const CONFIG = {
     Html5QrcodeSupportedFormats.CODE_128,
     Html5QrcodeSupportedFormats.QR_CODE,
   ],
-  videoConstraints: {
-    width: { ideal: 4096 }, // 設置理想解析度為最大值
-    height: { ideal: 2160 }, // 設置理想解析度為最大值
-  },
   rememberLastUsedCamera: true,
   supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
 };
