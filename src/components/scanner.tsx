@@ -74,7 +74,7 @@ export const Scanner = ({
 
           // 啟動新相機
           await html5Qrcode.current.start(
-            { facingMode: 'environment' },
+            { facingMode: { exact: 'environment' } },
             config,
             onCodeScanned,
             () => {},
