@@ -2,11 +2,10 @@ import { Html5QrcodeScanType, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { useEffect, useState } from 'react';
 import { useFetchCameras } from '../hooks/use-fetch-cameras';
 import { Scanner } from './scanner';
-import { useNavigate } from 'react-router';
 
 const CONFIG = {
   fps: 4,
-  qrbox: { width: 300, height: 200 },
+  qrbox: { width: 300, height: 250 },
   formatsToSupport: [
     Html5QrcodeSupportedFormats.CODE_128,
     Html5QrcodeSupportedFormats.QR_CODE,
@@ -17,8 +16,7 @@ const CONFIG = {
 
 const QRCODE_REGION = 'ADVANCED_EXAMPLE_QRCODE_REGION';
 
-function QrcodeScanner() {
-  const navigate = useNavigate();
+function QrcodeScanner({ onScanned }: { onScanned: (text: string) => void }) {
   const [selectedCameraId, setSelectedCameraId] = useState<string | undefined>(
     undefined,
   );
@@ -31,27 +29,27 @@ function QrcodeScanner() {
     fetchCameras();
   }, []);
 
-  const onScanned = (text: string) => {
-    navigate('/', { state: { decodedText: text } });
+  const onScanSuccess = (text: string) => {
+    onScanned(text);
   };
 
   if (loading) {
-    return <h3>Detecting available cameras...</h3>;
+    return <h3>檢查可使用的相機...</h3>;
   }
 
   if (error) {
-    return <h3>Failed to detect cameras</h3>;
+    return <h3>偵測相機失敗</h3>;
   }
 
   if (cameraDevices.length === 0) {
-    return <h3>No available cameras</h3>;
+    return <h3>無可用的相機</h3>;
   }
 
   return (
-    <div style={{ width: 450, height: 300 }}>
+    <div>
       <Scanner
         config={CONFIG}
-        onCodeScanned={onScanned}
+        onCodeScanned={onScanSuccess}
         qrcodeRegionId={QRCODE_REGION}
         cameraId={selectedCameraId ?? cameraDevices[0].id}
       />

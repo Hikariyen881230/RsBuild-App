@@ -1,1 +1,28 @@
 @import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@300;400;700&display=swap');
+
+body {
+  font-family: 'LXGW WenKai TC', cursive;
+  font-style: normal;
+}
+
+#anchor-button {
+  anchor-name: --anchor-button;
+}
+
+#button-tooltip {
+  position: fixed;
+  top: anchor(--anchor-button bottom);
+  left: anchor(--anchor-button start);
+}
+
+#button-tooltip:before {
+  content: '';
+  border-right: 10px solid transparent;
+  border-left: 10px solid transparent;
+  border-bottom: 10px solid #392f2f;
+  display: inline-block;
+  position: absolute;
+  top: -10px;
+  left: 20px;
+}
