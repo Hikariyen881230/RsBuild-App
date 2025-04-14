@@ -18,6 +18,10 @@ function Layout() {
         <Link to={'/css-test'} className={linkHover}>
           CSS測試
         </Link>
+        <span>|</span>
+        <Link to={'/react-19'} className={linkHover}>
+          React19
+        </Link>
       </div>
       <main>
         <Outlet />
